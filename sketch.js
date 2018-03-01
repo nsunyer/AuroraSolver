@@ -1,5 +1,10 @@
 // var tile;
 var grid;
+var rotateList;
+var moveList;
+var counter;
+var currentRotationPosition;
+var currentRotation;
 
 // constructor(pTileSize, pPositionX, pPositionY, pColorLeft=5, pColorTop=5, pColorRight=5, pColorBottom=5, pColorRotation=0)
 
@@ -7,6 +12,14 @@ function setup() {
   createCanvas(displayWidth, displayHeight);
   // tile = new Tile(120, 60, 60, color(255, 0, 0), color(0, 255, 0), color(0, 0, 255), color(255, 255, 0), 1);
   grid = new Grid(50, 50);
+  
+  fillRotateList();
+  fillMoveList();
+  counter = 0;
+  currentRotationPosition = rotateList.length - 1;
+  currentRotation = 0;
+
+  // rotateList[0].rotate(1);
 }
 
 function draw() {
@@ -16,13 +29,87 @@ function draw() {
   fill(23, 32, 42);
   rect(this.grid.offsetX * 0.5, this.grid.offsetY * 0.5, this.grid.offsetX + grid.tileSize * 9, this.grid.offsetY + grid.tileSize * 6);
   // tile.show();
+  // grid.playfield[0][0].rotate();
+  // counter++;
+  // if(counter % 10 == 0) {
+  //   for(var i = 0; i < rotateList.length; i++) {
+  //     rotateList[i].rotate((rotateList[i].rotationState + 1) % 4);
+  //   }
+  // }
+
+  if(currentRotation == 4) {
+    currentRotation = 0;
+    if(currentRotationPosition > 0) {
+      currentRotationPosition--;
+    }
+  }
+  rotateList[currentRotationPosition].rotate(currentRotation);
+  currentRotation++;
+
   grid.show();
   
 }
 
+function fillRotateList(){
+  rotateList = [];
+
+  let element0 = new RotableElement(0, 0, 0, 0);
+  element0.addToList();
+  let element1 = new RotableElement(0, 3, 1, 0);
+  element1.addToList();
+  let element2 = new RotableElement(0, 4, 2, 0);
+  element2.addToList();
+  let element3 = new RotableElement(1, 1, 3, 0);
+  element3.addToList();
+  let element4 = new RotableElement(1, 7, 4, 0);
+  element4.addToList();
+  let element5 = new RotableElement(2, 1, 5, 0);
+  element5.addToList();
+  let element6 = new RotableElement(2, 6, 6, 0);
+  element6.addToList();
+  let element7 = new RotableElement(3, 2, 7, 0);
+  element7.addToList();
+  let element8 = new RotableElement(3, 7, 8, 0);
+  element8.addToList();
+  let element9 = new RotableElement(4, 1, 9, 0);
+  element9.addToList();
+  let element10 = new RotableElement(4, 7, 10, 0);
+  element10.addToList();
+  let element11 = new RotableElement(5, 4, 11, 0);
+  element11.addToList();
+  let element12 = new RotableElement(5, 5, 12, 0);
+  element12.addToList();
+  let element13 = new RotableElement(5, 8, 13, 0);
+  element13.addToList();
+}
+
+function fillMoveList() {
+  moveList = [];
+}
+
+
+class RotableElement {
+  constructor(pRow,pColumn,pPlace,pRotationState) {
+    this.row = pRow;
+    this.column = pColumn;
+    this.place = pPlace;
+    this.rotationState = pRotationState;
+    this.rotated = false;
+  }
+
+  addToList() {
+    rotateList[this.place] = this;
+  }
+
+  rotate(pState) {
+    this.rotationState = pState;
+    this.rotated = true;
+  }
+}
+
 class Tile {
 
-  constructor(pTileSize, pPositionX, pPositionY, pColorLeft, pColorTop, pColorRight, pColorBottom, pColorRotation=0) {
+  constructor(pTileSize, pPositionX, pPositionY, pColorLeft, pColorTop, pColorRight, pColorBottom, pRotation=0) {
       this.tileSize = pTileSize;
       this.positionX = pPositionX;
       this.positionY = pPositionY;
@@ -30,7 +117,8 @@ class Tile {
       this.top = pColorTop;
       this.right = pColorRight;
       this.bottom = pColorBottom;
-      this.rotation = pColorRotation;
+      this.rotation = pRotation;
+      this.state = 0;
   }
 
   show(){
@@ -73,7 +161,36 @@ class Tile {
         fill(15);
         ellipse(this.positionX, this.positionY, this.tileSize / 2.0, this.tileSize / 2.0);
       }
+  }
 
+  rotate(pState){
+    var temp;
+    var diff = (4 + pState - this.state) % 4;
+    switch(diff){
+      case 1:
+        temp = this.left;
+        this.left = this.top;
+        this.top = this.right;
+        this.right = this.bottom;
+        this.bottom = temp;
+        break;
+      case 2:
+        temp = this.left;
+        this.left = this.right;
+        this.right = temp;
+        temp = this.top;
+        this.top = this.bottom;
+        this.bottom = temp; 
+        break;
+      case 3:
+        temp = this.left;
+        this.left = this.bottom;
+        this.bottom = this.right;
+        this.right = this.top;
+        this.top = temp;
+        break;
+    }
+    this.state = pState;
   }
 }
 
@@ -155,6 +272,15 @@ class Grid {
   }
 
   show(){
+    // Mirem si hi han figures rotades.
+    for(var a = 0; a < rotateList.length; a++) {
+      if(rotateList[a].rotated){
+        this.playfield[rotateList[a].row][rotateList[a].column].rotate(rotateList[a].rotationState);
+        rotateList[a].rotated = false;
+      }
+    }
+
+    // Pintem el grid per pantalla.
     for(var i = 0; i < 6; i++) {
       for(var j = 0; j < 9; j++) {
         if(this.playfield[i][j] != '0') {
