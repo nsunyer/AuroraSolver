@@ -5,6 +5,8 @@ var moveList;
 var counter;
 var currentRotationPosition;
 var currentRotation;
+var finished;
+var found;
 
 // constructor(pTileSize, pPositionX, pPositionY, pColorLeft=5, pColorTop=5, pColorRight=5, pColorBottom=5, pColorRotation=0)
 
@@ -23,29 +25,36 @@ function setup() {
 }
 
 function draw() {
+  // Pintem el fons
   background(this.grid.buit);
 
+  // Pintem el taulell;
   stroke(0,0,0);
   fill(23, 32, 42);
   rect(this.grid.offsetX * 0.5, this.grid.offsetY * 0.5, this.grid.offsetX + grid.tileSize * 9, this.grid.offsetY + grid.tileSize * 6);
-  // tile.show();
-  // grid.playfield[0][0].rotate();
-  // counter++;
-  // if(counter % 10 == 0) {
-  //   for(var i = 0; i < rotateList.length; i++) {
-  //     rotateList[i].rotate((rotateList[i].rotationState + 1) % 4);
-  //   }
-  // }
 
-  if(currentRotation == 4) {
-    currentRotation = 0;
-    if(currentRotationPosition > 0) {
+  // Actualitzem les rotations dels tiles;
+  currentRotationPosition = rotateList.length - 1;
+  finished =false;
+  found = false;
+  var state;
+
+  while(currentRotationPosition >= 0 && !found) {
+    state = rotateList[currentRotationPosition].rotationState;
+    if (state < 3) { //Si podem colocar la posició actual...
+      rotateList[currentRotationPosition].rotate(state + 1);
+      found = true;
+    } else {
+      rotateList[currentRotationPosition].rotate(0);
       currentRotationPosition--;
     }
-  }
-  rotateList[currentRotationPosition].rotate(currentRotation);
-  currentRotation++;
 
+    if(currentRotationPosition == -1) {
+      finished = true;
+    }
+  }
+
+  // Pintem els tiles.
   grid.show();
   
 }
@@ -160,6 +169,32 @@ class Tile {
         stroke(15);
         fill(15);
         ellipse(this.positionX, this.positionY, this.tileSize / 2.0, this.tileSize / 2.0);
+
+        switch(this.state) {
+          case 0:
+            stroke(255, 0, 0);
+            fill(255, 0, 0);
+            ellipse(this.positionX, this.positionY - this.tileSize / 8.0, this.tileSize / 4.0, this.tileSize / 4.0);
+            break;
+          case 1:
+            stroke(255, 0, 0);
+            fill(255, 0, 0);
+            ellipse(this.positionX - this.tileSize / 8.0, this.positionY, this.tileSize / 4.0, this.tileSize / 4.0);
+            break;
+          case 2:
+            stroke(255, 0, 0);
+            fill(255, 0, 0);
+            ellipse(this.positionX, this.positionY + this.tileSize / 8.0, this.tileSize / 4.0, this.tileSize / 4.0);
+            break;
+          case 3:
+            stroke(255, 0, 0);
+            fill(255, 0, 0);
+            ellipse(this.positionX + this.tileSize / 8.0, this.positionY, this.tileSize / 4.0, this.tileSize / 4.0);
+            break;
+          default:
+            console.log("Error! " + this.state);
+            break;
+        }
       }
   }
 
@@ -288,6 +323,6 @@ class Grid {
         }
       }
     }
-    
+    // console.log("RotationList: " + rotateList);
   }
 }
